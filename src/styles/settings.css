@@ -1,0 +1,102 @@
+.settings-screen{
+  width:100%;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:40px 20px;
+}
+
+.settings-box{
+  width:min(680px,100%);
+  padding:50px 40px;
+  border-radius:24px;
+  background:#fff;
+}
+
+.settings-title{
+  text-align:center;
+  margin-bottom:50px;
+}
+
+.settings-title h1{
+  margin:0;
+  font-size:42px;
+  color:#eee;
+  font-weight:700;
+}
+
+.settings-title p{
+  margin:8px 0 0;
+  color:#777;
+  font-size:18px;
+}
+
+.setting-item{
+  margin-bottom:38px;
+}
+
+.setting-item h3{
+  margin:0 0 16px;
+  text-align:center;
+  font-size:18px;
+}
+
+.setting-input{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.setting-input input{
+  width:92px;
+  height:42px;
+  padding:0 12px;
+  border:1px solid #ddd;
+  border-radius:9px;
+  outline:none;
+  font-size:16px;
+}
+
+.setting-input input:focus{
+  border-color:#aaa;
+}
+
+.setting-input span{
+  font-size:16px;
+}
+
+.next-button{
+  width:100%;
+  height:50px;
+  margin-top:10px;
+  border:0;
+  border-radius:10px;
+  background:#eee;
+  color:#333;
+  font-size:16px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.next-button:hover{
+  background:#ddd;
+}
+
+@media(max-width:600px){
+  .settings-screen{
+    padding:30px 15px;
+  }
+
+  .settings-box{
+    padding:40px 24px;
+  }
+
+  .settings-title h1{
+    font-size:32px;
+  }
+
+  .setting-input input{
+    width:80px;
+  }
+}

@@ -1,0 +1,149 @@
+.duty-time-screen{
+  width:100%;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:40px 20px;
+}
+
+.duty-time-box{
+  width:min(680px,100%);
+  padding:50px 40px;
+  border-radius:24px;
+  background:#fff;
+}
+
+.duty-time-title{
+  text-align:center;
+  margin-bottom:45px;
+}
+
+.duty-time-title h1{
+  margin:0;
+  font-size:32px;
+  color:#222;
+}
+
+.duty-time-title p{
+  margin:10px 0 0;
+  color:#777;
+  font-size:16px;
+}
+
+.duty-time-list{
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+}
+
+.duty-time-item{
+  display:flex;
+  align-items:center;
+  gap:20px;
+  padding:20px;
+  border-radius:16px;
+  background:#f7f7f7;
+}
+
+.duty-label{
+  width:50px;
+  height:50px;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  background:#fff;
+  font-size:20px;
+  font-weight:700;
+}
+
+.duty-input-group{
+  flex:1;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.duty-input-group label{
+  font-size:14px;
+  color:#777;
+  white-space:nowrap;
+}
+
+.duty-input-group input{
+  width:130px;
+  height:42px;
+  padding:0 10px;
+  border:1px solid #ddd;
+  border-radius:9px;
+  background:#fff;
+  font-size:16px;
+  outline:none;
+}
+
+.duty-input-group input:focus{
+  border-color:#aaa;
+}
+
+.duty-time-buttons{
+  display:flex;
+  gap:12px;
+  margin-top:35px;
+}
+
+.duty-back-button,
+.duty-next-button{
+  flex:1;
+  height:50px;
+  border:0;
+  border-radius:10px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.duty-back-button{
+  background:#f1f1f1;
+}
+
+.duty-back-button:hover{
+  background:#e5e5e5;
+}
+
+.duty-next-button{
+  background:#eee;
+}
+
+.duty-next-button:hover{
+  background:#ddd;
+}
+
+@media(max-width:600px){
+  .duty-time-screen{
+    padding:30px 15px;
+  }
+
+  .duty-time-box{
+    padding:35px 20px;
+  }
+
+  .duty-time-item{
+    flex-wrap:wrap;
+    gap:15px;
+  }
+
+  .duty-label{
+    width:100%;
+  }
+
+  .duty-input-group{
+    width:100%;
+    flex:none;
+  }
+
+  .duty-input-group input{
+    flex:1;
+    width:auto;
+  }
+}

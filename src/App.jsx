@@ -1,385 +1,185 @@
-import { useState } from 'react'
+import {useEffect,useState} from 'react'
+import {supabase} from './supabase'
+import Auth from './components/Auth'
+import Settings from './components/Settings'
+import DutyTimeSettings from './components/DutyTimeSettings'
+import Calendar from './components/Calendar'
+import ScheduleList from './components/ScheduleList'
+import AccountPanel from './components/AccountPanel'
+import {loadDutySchedules,saveDutySchedule} from './services/dutyService'
+import './styles/main.css'
 import './App.css'
 
-function App() {
-  const [step, setStep] = useState(1)
+function App(){
+  const [session,setSession]=useState(null)
+  const [step,setStep]=useState(1)
+  const [mealCount,setMealCount]=useState(2)
+  const [prepareTime,setPrepareTime]=useState(1)
+  const [sleepHours,setSleepHours]=useState(7)
+  const [sleepMinutes,setSleepMinutes]=useState(30)
 
-  const [mealCount, setMealCount] = useState(2)
-  const [prepareTime, setPrepareTime] = useState(1)
-  const [sleepHours, setSleepHours] = useState(7)
-  const [sleepMinutes, setSleepMinutes] = useState(30)
-
-  const [dutyTimes, setDutyTimes] = useState({
-    D: { start: '06:00', end: '15:00' },
-    E: { start: '14:00', end: '23:00' },
-    N: { start: '22:00', end: '07:00' },
+  const [dutyTimes,setDutyTimes]=useState({
+    D:{start:'06:00',end:'15:00'},
+    E:{start:'14:00',end:'23:00'},
+    N:{start:'22:00',end:'07:00'}
   })
 
-  const [currentDate, setCurrentDate] = useState(
-    new Date(2026, 7, 1)
-  )
+  const [currentDate,setCurrentDate]=useState(new Date())
+  const [dutyTable,setDutyTable]=useState({})
+  const [accountOpen,setAccountOpen]=useState(false)
 
-  const [dutyTable, setDutyTable] = useState({})
+  useEffect(()=>{
+    const initialize=async()=>{
+      const {data:{session}}=await supabase.auth.getSession()
+      setSession(session)
 
-  const handleDutyTimeChange = (duty, type, value) => {
-    setDutyTimes({
-      ...dutyTimes,
-      [duty]: {
-        ...dutyTimes[duty],
-        [type]: value,
-      },
-    })
-  }
-
-  const getCalendarDays = () => {
-    const year = currentDate.getFullYear()
-    const month = currentDate.getMonth()
-
-    const firstDay = new Date(year, month, 1).getDay()
-    const lastDate = new Date(year, month + 1, 0).getDate()
-
-    const days = []
-
-    for (let i = 0; i < firstDay; i++) {
-      days.push(null)
+      if(session){
+        try{
+          setDutyTable(await loadDutySchedules())
+        }catch(error){
+          console.error('듀티표 불러오기 실패:',error)
+        }
+      }
     }
 
-    for (let day = 1; day <= lastDate; day++) {
-      days.push(day)
-    }
+    initialize()
 
-    return days
-  }
-
-  const changeMonth = (amount) => {
-    setCurrentDate(
-      new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth() + amount,
-        1
-      )
+    const {data:{subscription}}=supabase.auth.onAuthStateChange(
+      (_event,session)=>{
+        setSession(session)
+      }
     )
+
+    return()=>subscription.unsubscribe()
+  },[])
+
+  const handleLogin=async(email,password)=>{
+    if(!email||!password)return alert('이메일과 비밀번호를 입력해주세요.')
+
+    const {data,error}=await supabase.auth.signInWithPassword({email,password})
+
+    if(error)return alert(error.message)
+
+    setSession(data.session)
+
+    try{
+      setDutyTable(await loadDutySchedules())
+    }catch(error){
+      console.error('듀티표 불러오기 실패:',error)
+    }
+
+    setStep(1)
   }
 
-  const selectDuty = (dateKey, duty) => {
-    setDutyTable((prev) => ({
+  const handleSignUp=async(email,password)=>{
+    if(!email||!password)return alert('이메일과 비밀번호를 입력해주세요.')
+    if(password.length<6)return alert('비밀번호는 6자리 이상 입력해주세요.')
+
+    const {error}=await supabase.auth.signUp({email,password})
+
+    if(error)return alert(error.message)
+
+    alert('회원가입 요청이 완료되었습니다.')
+  }
+
+  const handleLogout=async()=>{
+    await supabase.auth.signOut()
+    setSession(null)
+    setDutyTable({})
+    setAccountOpen(false)
+    setStep(1)
+  }
+
+  const handleDutyTimeChange=(duty,type,value)=>{
+    setDutyTimes(prev=>({
       ...prev,
-      [dateKey]: duty,
+      [duty]:{
+        ...prev[duty],
+        [type]:value
+      }
     }))
   }
 
-  return (
+  const handleDutySelect=async(date,duty)=>{
+    setDutyTable(prev=>({
+      ...prev,
+      [date]:duty
+    }))
+
+    try{
+      await saveDutySchedule(date,duty)
+    }catch(error){
+      console.error('일정 저장 실패:',error)
+      alert('일정 저장에 실패했습니다.')
+    }
+  }
+
+  const handleMonthChange=amount=>{
+    setCurrentDate(prev=>new Date(
+      prev.getFullYear(),
+      prev.getMonth()+amount,
+      1
+    ))
+  }
+
+  if(!session){
+    return <Auth onLogin={handleLogin} onSignUp={handleSignUp}/>
+  }
+
+  return(
     <div className="app">
       <div className="card">
+        <AccountPanel
+          session={session}
+          open={accountOpen}
+          onClose={()=>setAccountOpen(!accountOpen)}
+          onLogout={handleLogout}
+        />
 
-        {/* STEP 1 */}
-        {step === 1 && (
-          <>
-            <h1>듀티 메이트</h1>
-
-            <p className="subtitle">
-              생활 설정을 입력해주세요
-            </p>
-
-            <div className="setting">
-              <label>하루 식사 횟수</label>
-
-              <div className="input-row">
-                <input
-                  type="number"
-                  min="1"
-                  value={mealCount}
-                  onChange={(e) =>
-                    setMealCount(Number(e.target.value))
-                  }
-                />
-                <span>끼</span>
-              </div>
-            </div>
-
-            <div className="setting">
-              <label>출근 준비 시간</label>
-
-              <div className="input-row">
-                <input
-                  type="number"
-                  min="0"
-                  value={prepareTime}
-                  onChange={(e) =>
-                    setPrepareTime(Number(e.target.value))
-                  }
-                />
-                <span>시간 전</span>
-              </div>
-            </div>
-
-            <div className="setting">
-              <label>목표 수면 시간</label>
-
-              <div className="input-row">
-                <input
-                  type="number"
-                  min="0"
-                  value={sleepHours}
-                  onChange={(e) =>
-                    setSleepHours(Number(e.target.value))
-                  }
-                />
-
-                <span>시간</span>
-
-                <input
-                  type="number"
-                  min="0"
-                  max="59"
-                  value={sleepMinutes}
-                  onChange={(e) =>
-                    setSleepMinutes(Number(e.target.value))
-                  }
-                />
-
-                <span>분</span>
-              </div>
-            </div>
-
-            <button onClick={() => setStep(2)}>
-              다음
-            </button>
-          </>
+        {step===1&&(
+          <Settings
+            mealCount={mealCount}
+            setMealCount={setMealCount}
+            prepareTime={prepareTime}
+            setPrepareTime={setPrepareTime}
+            sleepHours={sleepHours}
+            setSleepHours={setSleepHours}
+            sleepMinutes={sleepMinutes}
+            setSleepMinutes={setSleepMinutes}
+            onNext={()=>setStep(2)}
+          />
         )}
 
-        {/* STEP 2 */}
-        {step === 2 && (
-          <>
-            <h1>근무시간 설정</h1>
-
-            <p className="subtitle">
-              D / E / N 근무시간을 확인해주세요
-            </p>
-
-            {['D', 'E', 'N'].map((duty) => (
-              <div className="duty-setting" key={duty}>
-                <label>{duty} 근무</label>
-
-                <div className="time-row">
-                  <input
-                    type="time"
-                    value={dutyTimes[duty].start}
-                    onChange={(e) =>
-                      handleDutyTimeChange(
-                        duty,
-                        'start',
-                        e.target.value
-                      )
-                    }
-                  />
-
-                  <span>~</span>
-
-                  <input
-                    type="time"
-                    value={dutyTimes[duty].end}
-                    onChange={(e) =>
-                      handleDutyTimeChange(
-                        duty,
-                        'end',
-                        e.target.value
-                      )
-                    }
-                  />
-                </div>
-              </div>
-            ))}
-
-            <button onClick={() => setStep(3)}>
-              저장
-            </button>
-          </>
+        {step===2&&(
+          <DutyTimeSettings
+            dutyTimes={dutyTimes}
+            onChange={handleDutyTimeChange}
+            onNext={()=>setStep(3)}
+            onBack={()=>setStep(1)}
+          />
         )}
 
-        {/* STEP 3 */}
-        {step === 3 && (
-          <>
-            <h1>듀티표</h1>
-
-            <p className="subtitle">
-              날짜에 마우스를 올려 근무를 선택해주세요
-            </p>
-
-            <div className="calendar">
-
-              <div className="calendar-header">
-                <button
-                  className="month-button"
-                  onClick={() => changeMonth(-1)}
-                >
-                  ‹
-                </button>
-
-                <h2>
-                  {currentDate.getFullYear()}년{' '}
-                  {currentDate.getMonth() + 1}월
-                </h2>
-
-                <button
-                  className="month-button"
-                  onClick={() => changeMonth(1)}
-                >
-                  ›
-                </button>
-              </div>
-
-              <div className="weekdays">
-                <div>일</div>
-                <div>월</div>
-                <div>화</div>
-                <div>수</div>
-                <div>목</div>
-                <div>금</div>
-                <div>토</div>
-              </div>
-
-              <div className="calendar-grid">
-
-                {getCalendarDays().map((day, index) => {
-
-                  if (day === null) {
-                    return (
-                      <div
-                        className="calendar-day empty"
-                        key={index}
-                      />
-                    )
-                  }
-
-                  const key =
-                    `${currentDate.getFullYear()}-` +
-                    `${String(
-                      currentDate.getMonth() + 1
-                    ).padStart(2, '0')}-` +
-                    `${String(day).padStart(2, '0')}`
-
-                  const duty = dutyTable[key]
-
-                  return (
-                    <div
-                      className="calendar-day-wrapper"
-                      key={key}
-                    >
-                      <div
-                        className={`calendar-day ${
-                          duty
-                            ? `has-${duty}`
-                            : ''
-                        }`}
-                      >
-
-                        <span className="day-number">
-                          {day}
-                        </span>
-
-                        {duty && (
-                          <span
-                            className={`duty ${duty}`}
-                          >
-                            {duty}
-                          </span>
-                        )}
-
-                        <div className="duty-menu">
-
-                          <button
-                            onClick={() =>
-                              selectDuty(key, 'D')
-                            }
-                          >
-                            D
-                          </button>
-
-                          <button
-                            onClick={() =>
-                              selectDuty(key, 'E')
-                            }
-                          >
-                            E
-                          </button>
-
-                          <button
-                            onClick={() =>
-                              selectDuty(key, 'N')
-                            }
-                          >
-                            N
-                          </button>
-
-                          <button
-                            onClick={() =>
-                              selectDuty(key, 'OFF')
-                            }
-                          >
-                            OFF
-                          </button>
-
-                        </div>
-
-                      </div>
-                    </div>
-                  )
-                })}
-
-              </div>
-            </div>
-
-            <button onClick={() => setStep(4)}>
-              일정 생성
-            </button>
-
-            <button onClick={() => setStep(2)}>
-              이전
-            </button>
-          </>
+        {step===3&&(
+          <Calendar
+            currentDate={currentDate}
+            dutyTable={dutyTable}
+            onMonthChange={handleMonthChange}
+            onDutySelect={handleDutySelect}
+            onGenerate={()=>setStep(4)}
+            onSettings={()=>setStep(2)}
+          />
         )}
 
-        {/* STEP 4 */}
-        {step === 4 && (
-          <>
-            <h1>일정 생성</h1>
-
-            <p className="subtitle">
-              입력한 듀티표를 확인해주세요.
-            </p>
-
-            <div className="result-list">
-
-              {Object.entries(dutyTable).length === 0 ? (
-                <p>입력된 근무가 없습니다.</p>
-              ) : (
-                Object.entries(dutyTable).map(
-                  ([date, duty]) => (
-                    <div
-                      className="result-row"
-                      key={date}
-                    >
-                      <span>{date}</span>
-
-                      <strong
-                        className={`duty ${duty}`}
-                      >
-                        {duty}
-                      </strong>
-                    </div>
-                  )
-                )
-              )}
-
-            </div>
-
-            <button onClick={() => setStep(3)}>
-              듀티표 수정
-            </button>
-          </>
+        {step===4&&(
+          <ScheduleList
+            dutyTable={dutyTable}
+            dutyTimes={dutyTimes}
+            prepareTime={prepareTime}
+            sleepHours={sleepHours}
+            sleepMinutes={sleepMinutes}
+            onBack={()=>setStep(3)}
+          />
         )}
-
       </div>
     </div>
   )
