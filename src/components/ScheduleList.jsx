@@ -5,6 +5,7 @@ import '../styles/schedule.css'
 function ScheduleList({
   dutyTable,
   dutyTimes,
+  mealCount,
   prepareTime,
   sleepHours,
   sleepMinutes,
@@ -278,6 +279,7 @@ function ScheduleList({
   const currentSchedule = createSchedule({
     duty: currentDuty,
     dutyTimes,
+    mealCount,
     prepareTime,
     sleepHours,
     sleepMinutes,

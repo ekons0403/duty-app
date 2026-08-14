@@ -6,7 +6,7 @@ import DutyTimeSettings from './components/DutyTimeSettings'
 import Calendar from './components/Calendar'
 import ScheduleList from './components/ScheduleList'
 import AccountPanel from './components/AccountPanel'
-import {loadDutySchedules,saveDutySchedule} from './services/dutyService'
+import {loadDutySchedules,saveDutySchedule,loadUserSettings,saveUserSettings,} from './services/dutyService'
 import './styles/main.css'
 import './App.css'
 
@@ -35,9 +35,19 @@ function App(){
 
       if(session){
         try{
-          setDutyTable(await loadDutySchedules())
+          const schedules = await loadDutySchedules()
+          setDutyTable(schedules)
+
+          const settings = await loadUserSettings()
+
+          if(settings){
+            setMealCount(settings.mealCount)
+            setPrepareTime(settings.prepareTime)
+            setSleepHours(settings.sleepHours)
+            setSleepMinutes(settings.sleepMinutes)
+          }
         }catch(error){
-          console.error('듀티표 불러오기 실패:',error)
+          console.error('데이터 불러오기 실패:',error)
         }
       }
     }
@@ -63,9 +73,19 @@ function App(){
     setSession(data.session)
 
     try{
-      setDutyTable(await loadDutySchedules())
+      const schedules = await loadDutySchedules()
+      setDutyTable(schedules)
+
+      const settings = await loadUserSettings()
+
+      if(settings){
+        setMealCount(settings.mealCount)
+        setPrepareTime(settings.prepareTime)
+        setSleepHours(settings.sleepHours)
+        setSleepMinutes(settings.sleepMinutes)
+      }
     }catch(error){
-      console.error('듀티표 불러오기 실패:',error)
+      console.error('데이터 불러오기 실패:',error)
     }
 
     setStep(1)
@@ -126,6 +146,22 @@ function App(){
     return <Auth onLogin={handleLogin} onSignUp={handleSignUp}/>
   }
 
+  const handleSettingsNext = async () => {
+      try {
+        await saveUserSettings({
+          mealCount,
+          prepareTime,
+          sleepHours,
+          sleepMinutes,
+        })
+
+        setStep(2)
+      } catch(error) {
+        console.error('생활 설정 저장 실패:', error)
+        alert('생활 설정 저장에 실패했습니다.')
+      }
+    }
+
   return(
     <div className="app">
       <div className="card">
@@ -147,7 +183,7 @@ function App(){
             setSleepHours={setSleepHours}
             sleepMinutes={sleepMinutes}
             setSleepMinutes={setSleepMinutes}
-            onNext={()=>setStep(2)}
+            onNext={handleSettingsNext}
           />
         )}
 
@@ -175,6 +211,7 @@ function App(){
           <ScheduleList
             dutyTable={dutyTable}
             dutyTimes={dutyTimes}
+            mealCount={mealCount}
             prepareTime={prepareTime}
             sleepHours={sleepHours}
             sleepMinutes={sleepMinutes}
