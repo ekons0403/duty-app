@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import '../styles/auth.css'
 
 function Auth({
@@ -10,13 +10,40 @@ function Auth({
   const [mode, setMode] = useState('login')
   const [saveEmail, setSaveEmail] = useState(false)
 
+
+  // 저장된 이메일 불러오기
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('duty-mate-email')
+
+    if (savedEmail) {
+      setEmail(savedEmail)
+      setSaveEmail(true)
+    }
+  }, [])
+
+
   const handleLogin = async () => {
+
+    // 이메일 저장
+    if (saveEmail) {
+      localStorage.setItem(
+        'duty-mate-email',
+        email
+      )
+    } else {
+      localStorage.removeItem(
+        'duty-mate-email'
+      )
+    }
+
     await onLogin(email, password)
   }
+
 
   const handleSignUp = async () => {
     await onSignUp(email, password)
   }
+
 
   return (
     <div className="auth-screen">
@@ -64,7 +91,9 @@ function Auth({
             type="email"
             placeholder="이메일을 입력해주세요"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) =>
+              setEmail(e.target.value)
+            }
           />
 
         </div>
@@ -82,7 +111,9 @@ function Auth({
             type="password"
             placeholder="비밀번호를 입력해주세요"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
           />
 
         </div>
@@ -90,22 +121,22 @@ function Auth({
 
         {/* 이메일 저장 */}
         {mode === 'login' && (
-        <div className="auth-save">
+          <div className="auth-save">
 
-          <input
-            id="save-email"
-            type="checkbox"
-            checked={saveEmail}
-            onChange={(e) =>
-              setSaveEmail(e.target.checked)
-            }
-          />
+            <input
+              id="save-email"
+              type="checkbox"
+              checked={saveEmail}
+              onChange={(e) =>
+                setSaveEmail(e.target.checked)
+              }
+            />
 
-          <label htmlFor="save-email">
-            이메일 저장
-          </label>
+            <label htmlFor="save-email">
+              이메일 저장
+            </label>
 
-        </div>
+          </div>
         )}
 
 
