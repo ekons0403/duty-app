@@ -1,16 +1,430 @@
-# React + Vite
+# 🗓️ 듀티 메이트
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **교대근무자를 위한 맞춤형 생활 일정 관리 서비스**
 
-Currently, two official plugins are available:
+교대근무를 하다 보면 매일 달라지는 출근 시간 때문에
+수면, 식사, 출근 준비 시간을 직접 계산해야 하는 불편함이 있습니다.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+**듀티 메이트**는 사용자의 근무 일정과 생활 습관을 바탕으로
+하루의 생활 일정을 자동으로 계산해주는 웹 애플리케이션입니다.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## ✨ Ver.1
 
-## Expanding the ESLint configuration
+**듀티 메이트의 첫 번째 버전입니다.**
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Ver.1에서는 교대근무자의 기본적인 생활 패턴을 설정하고,
+듀티에 맞춰 **수면 → 식사 → 출근 준비 → 근무 → 퇴근 후 식사**까지
+하루의 일정을 자동으로 생성하는 기능에 집중했습니다.
+
+---
+
+## 🎯 핵심 기능
+
+### ⚙️ 생활 설정
+
+사용자의 생활 패턴에 맞게 다음 항목을 설정할 수 있습니다.
+
+* 🍚 하루 식사 횟수
+* 🚿 출근 준비 시간
+* 😴 목표 수면 시간
+
+설정한 값은 생활 일정 계산에 바로 반영됩니다.
+
+---
+
+### 🏥 교대근무 설정
+
+현재 Ver.1에서는 다음과 같은 교대근무 시간을 설정할 수 있습니다.
+
+|  근무  | 기본 출근 | 기본 퇴근 |
+| :--: | :---: | :---: |
+| 🌅 D | 06:00 | 15:00 |
+| 🌇 E | 14:00 | 23:00 |
+| 🌙 N | 22:00 | 07:00 |
+
+사용자가 원하는 시간으로 직접 변경할 수 있습니다.
+
+특히 **N 근무처럼 자정을 넘어가는 근무**도 자동으로 처리합니다.
+
+---
+
+### 📅 듀티 캘린더
+
+월별 캘린더에서 자신의 근무를 직접 지정할 수 있습니다.
+
+* D : Day
+* E : Evening
+* N : Night
+* OFF : 휴무
+
+입력한 듀티 정보는 사용자 계정에 저장되며
+다시 접속해도 기존 근무표를 불러올 수 있습니다.
+
+---
+
+### 🧠 생활 일정 자동 계산
+
+듀티와 생활 설정을 기반으로 하루의 일정을 자동 계산합니다.
+
+```text
+                ┌──────────────┐
+                │   근무시간    │
+                └──────┬───────┘
+                       │
+             ┌─────────▼─────────┐
+             │   출근 준비시간    │
+             └─────────┬─────────┘
+                       │
+             ┌─────────▼─────────┐
+             │    출근 전 식사    │
+             └─────────┬─────────┘
+                       │
+             ┌─────────▼─────────┐
+             │    목표 수면시간   │
+             └───────────────────┘
+```
+
+예를 들어 출근 시간이 변경되면
+출근 준비 → 식사 → 수면 시간이 함께 재계산됩니다.
+
+### 🔄 자동 재계산
+
+다음 설정을 변경하면 일정이 즉시 다시 계산됩니다.
+
+```text
+출근 시간 변경
+      ↓
+출근 준비 시간 재계산
+      ↓
+출근 전 식사 시간 재계산
+      ↓
+목표 수면 시간 기준 수면 재계산
+```
+
+즉, 사용자가 직접 시간을 다시 계산할 필요가 없습니다.
+
+---
+
+## 💾 데이터 저장
+
+듀티 메이트는 **Supabase**를 이용하여 사용자 데이터를 관리합니다.
+
+### 저장되는 데이터
+
+#### 듀티 일정
+
+```text
+duty_schedules
+├── user_id
+├── date
+└── duty
+```
+
+#### 생활 설정
+
+```text
+user_settings
+├── user_id
+├── meal_count
+├── prepare_time
+├── sleep_hours
+└── sleep_minutes
+```
+
+사용자별로 데이터가 분리되기 때문에
+각 계정마다 자신의 듀티와 생활 설정을 관리할 수 있습니다.
+
+---
+
+## 🔐 인증
+
+Supabase Authentication을 사용하여 사용자 인증을 구현했습니다.
+
+* 회원가입
+* 로그인
+* 로그아웃
+* 사용자별 데이터 관리
+
+---
+
+## 📱 UX
+
+듀티 메이트는 단순히 일정을 보여주는 것보다
+**교대근무자가 빠르게 자신의 하루를 확인할 수 있는 것**에 초점을 맞췄습니다.
+
+### 날짜 이동
+
+생활 일정 화면에서는 날짜를 좌우로 이동할 수 있습니다.
+
+* PC : 마우스 드래그
+* 모바일 : 스와이프
+* 좌우 버튼을 통한 날짜 이동
+
+현재 날짜는 별도로 강조하여
+오늘의 일정을 빠르게 확인할 수 있도록 구성했습니다.
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+* **React**
+* **JavaScript**
+* **CSS**
+* **Vite**
+
+### Backend / Database
+
+* **Supabase**
+
+  * Authentication
+  * PostgreSQL
+  * Row Level Security
+
+### Deployment
+
+* **Vercel**
+
+---
+
+## 📂 Project Structure
+
+```text
+src/
+├── components/
+│   ├── Auth.jsx
+│   ├── Settings.jsx
+│   ├── DutyTimeSettings.jsx
+│   ├── Calendar.jsx
+│   ├── ScheduleList.jsx
+│   └── AccountPanel.jsx
+│
+├── services/
+│   └── dutyService.js
+│
+├── utils/
+│   └── schedule.js
+│
+├── styles/
+│   ├── main.css
+│   ├── settings.css
+│   └── schedule.css
+│
+├── App.jsx
+├── supabase.js
+└── main.jsx
+```
+
+---
+
+## 🧮 일정 계산 방식
+
+듀티 메이트의 핵심은 **근무시간을 기준으로 생활 일정을 역산하는 것**입니다.
+
+예를 들어,
+
+```text
+출근       06:00
+준비시간   1시간
+식사       30분
+수면       7시간 30분
+```
+
+이라면,
+
+```text
+22:00 ───────── 04:00
+        😴 수면
+
+04:00 ───────── 04:30
+        🍚 출근 전 식사
+
+04:30 ───────── 05:30
+        🚿 출근 준비
+
+06:00 ───────── 15:00
+        🏥 근무
+
+15:30 ───────── 16:00
+        🍚 퇴근 후 식사
+```
+
+처럼 계산됩니다.
+
+시간 계산은 모든 시간을 **분 단위로 변환한 뒤 계산**하고,
+마지막에 다시 `HH:mm` 형식으로 변환합니다.
+
+```javascript
+timeToMinutes()
+        ↓
+분 단위 계산
+        ↓
+minutesToTime()
+        ↓
+HH:mm
+```
+
+이 방식을 사용하여 자정을 넘어가는 **야간근무(N)**도 처리할 수 있습니다.
+
+---
+
+## 🚀 실행 방법
+
+### 1. 프로젝트 클론
+
+```bash
+git clone <repository-url>
+cd duty-mate
+```
+
+### 2. 패키지 설치
+
+```bash
+npm install
+```
+
+### 3. 환경변수 설정
+
+프로젝트 루트에 `.env` 파일을 생성합니다.
+
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### 4. 개발 서버 실행
+
+```bash
+npm run dev
+```
+
+브라우저에서 표시되는 로컬 주소로 접속합니다.
+
+---
+
+## 🗄️ Supabase 설정
+
+프로젝트를 실행하기 위해 Supabase 프로젝트가 필요합니다.
+
+### `duty_schedules`
+
+사용자의 날짜별 근무 정보를 저장합니다.
+
+### `user_settings`
+
+사용자의 생활 설정을 저장합니다.
+
+```text
+meal_count
+prepare_time
+sleep_hours
+sleep_minutes
+```
+
+두 테이블 모두 `user_id`를 기준으로 사용자 데이터를 분리하며,
+RLS(Row Level Security)를 적용하여 자신의 데이터만 접근할 수 있도록 구성합니다.
+
+---
+
+## 🔄 Ver.1 사용 흐름
+
+```text
+┌──────────────┐
+│ 회원가입 / 로그인 │
+└──────┬───────┘
+       ↓
+┌──────────────┐
+│ 생활 설정 입력 │
+│ 식사 / 준비 / 수면 │
+└──────┬───────┘
+       ↓
+┌──────────────┐
+│ 근무시간 설정 │
+│ D / E / N    │
+└──────┬───────┘
+       ↓
+┌──────────────┐
+│ 듀티 캘린더  │
+│ 날짜별 근무 입력 │
+└──────┬───────┘
+       ↓
+┌──────────────┐
+│ 생활 일정 생성 │
+└──────┬───────┘
+       ↓
+┌────────────────────┐
+│ 😴 수면             │
+│ 🍚 식사             │
+│ 🚿 출근 준비        │
+│ 🏥 근무             │
+│ 🍚 퇴근 후 식사     │
+└────────────────────┘
+```
+
+---
+
+## 🧩 Ver.1에서 해결하고자 한 문제
+
+교대근무자는 일반적인 일정 관리 앱을 사용하더라도
+매일 달라지는 출근 시간에 맞춰 생활 일정을 직접 조정해야 합니다.
+
+듀티 메이트는 이 과정을 자동화합니다.
+
+> **"오늘 몇 시에 자야 하지?"**
+> **"출근하려면 언제부터 준비해야 하지?"**
+> **"식사는 언제 하는 게 좋지?"**
+
+이러한 반복적인 시간 계산을
+사용자의 설정과 듀티를 기반으로 자동화하는 것이 프로젝트의 핵심입니다.
+
+---
+
+## 🔮 Next — Ver.2
+
+Ver.1을 기반으로 다음 기능을 확장할 예정입니다.
+
+* [ ] 더 정교한 식사 시간 자동 배치
+* [ ] 근무 전/후 생활 패턴 개선
+* [ ] 휴무일 생활 일정 최적화
+* [ ] 개인별 일정 커스터마이징
+* [ ] 일정 직접 수정 기능
+* [ ] 반복 듀티 패턴 자동 생성
+* [ ] 주간 / 월간 생활 패턴 분석
+* [ ] 수면 및 식사 통계
+* [ ] 알림 기능
+* [ ] 모바일 UI 개선
+* [ ] 일정 추천 로직 고도화
+
+---
+
+## 📌 Version
+
+### v1.0.0
+
+**현재 개발 완료 버전**
+
+* 사용자 인증
+* 듀티 캘린더
+* D / E / N / OFF 근무 관리
+* 근무시간 설정
+* 출근 준비시간 설정
+* 목표 수면시간 설정
+* 식사 횟수 설정
+* 생활 일정 자동 계산
+* 야간근무 시간 계산
+* Supabase 데이터 저장
+* 사용자별 데이터 관리
+* 날짜 스와이프 / 드래그
+
+---
+
+## 👨‍💻 Project
+
+**DUTY MATE**
+
+> 교대근무자의 하루를 조금 더 편하게.
+
+**Version 1.0.0**
