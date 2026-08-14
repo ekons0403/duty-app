@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createSchedule } from '../utils/schedule'
 import '../styles/schedule.css'
 
@@ -12,7 +12,6 @@ function ScheduleList({
 }) {
   const dates = Object.keys(dutyTable).sort()
 
-  // 오늘 날짜를 YYYY-MM-DD 형식으로 생성
   const getTodayString = () => {
     const today = new Date()
 
@@ -25,20 +24,17 @@ function ScheduleList({
 
   const today = getTodayString()
 
-  // 오늘 날짜의 index
-  const todayIndex = dates.indexOf(today)
-
-  // 오늘이 없으면 가장 가까운 날짜 선택
-  const getInitialIndex = () => {
-    if (todayIndex !== -1) {
-      return todayIndex
-    }
-
+  const findInitialIndex = () => {
     if (dates.length === 0) {
       return 0
     }
 
-    // 오늘보다 이전인 가장 가까운 날짜 찾기
+    const todayIndex = dates.indexOf(today)
+
+    if (todayIndex !== -1) {
+      return todayIndex
+    }
+
     let closestIndex = 0
 
     dates.forEach((date, index) => {
@@ -51,26 +47,38 @@ function ScheduleList({
   }
 
   const [currentIndex, setCurrentIndex] = useState(
-    getInitialIndex()
+    findInitialIndex()
   )
 
   const [touchStartX, setTouchStartX] = useState(null)
 
-  // dutyTable이 변경되면 오늘 날짜를 다시 중앙으로
+  const [dragOffset, setDragOffset] = useState(0)
+
+  const [isDragging, setIsDragging] = useState(false)
+
+  const [slideDirection, setSlideDirection] = useState(null)
+
+  const mouseStartX = useRef(null)
+
+  /*
+   * 듀티표가 변경되면 오늘 날짜를 다시 선택
+   */
   useEffect(() => {
     if (dates.length === 0) {
       setCurrentIndex(0)
       return
     }
 
-    const newTodayIndex = dates.indexOf(today)
+    const todayIndex = dates.indexOf(today)
 
-    if (newTodayIndex !== -1) {
-      setCurrentIndex(newTodayIndex)
+    if (todayIndex !== -1) {
+      setCurrentIndex(todayIndex)
     }
   }, [dutyTable])
 
-  // 날짜 이동
+  /*
+   * 날짜 이동
+   */
   const moveDate = (amount) => {
     setCurrentIndex((prev) => {
       const next = prev + amount
@@ -85,52 +93,15 @@ function ScheduleList({
 
       return next
     })
+
+    setSlideDirection(
+      amount > 0 ? 'next' : 'previous'
+    )
   }
 
-  // PC 가로 휠
-  const handleWheel = (e) => {
-    if (Math.abs(e.deltaX) < 10) {
-      return
-    }
-
-    if (e.deltaX > 30) {
-      moveDate(1)
-    }
-
-    if (e.deltaX < -30) {
-      moveDate(-1)
-    }
-  }
-
-  // 모바일 스와이프 시작
-  const handleTouchStart = (e) => {
-    setTouchStartX(e.touches[0].clientX)
-  }
-
-  // 모바일 스와이프 종료
-  const handleTouchEnd = (e) => {
-    if (touchStartX === null) {
-      return
-    }
-
-    const touchEndX = e.changedTouches[0].clientX
-    const diff = touchStartX - touchEndX
-
-    // 50px 이상 움직였을 때만 이동
-    if (Math.abs(diff) >= 50) {
-      if (diff > 0) {
-        // 왼쪽으로 스와이프 → 다음 날짜
-        moveDate(1)
-      } else {
-        // 오른쪽으로 스와이프 → 이전 날짜
-        moveDate(-1)
-      }
-    }
-
-    setTouchStartX(null)
-  }
-
-  // 날짜 표시
+  /*
+   * 날짜 표시
+   */
   const formatDate = (date) => {
     if (!date) {
       return ''
@@ -141,7 +112,9 @@ function ScheduleList({
     return `${month}/${day}`
   }
 
-  // 요일
+  /*
+   * 요일
+   */
   const getDayName = (date) => {
     if (!date) {
       return ''
@@ -162,7 +135,109 @@ function ScheduleList({
     return names[day]
   }
 
-  // 일정이 없는 경우
+  /*
+   * 모바일 터치 시작
+   */
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.touches[0].clientX)
+    setDragOffset(0)
+    setIsDragging(true)
+  }
+
+  /*
+   * 모바일 손가락 이동
+   */
+  const handleTouchMove = (e) => {
+    if (touchStartX === null) {
+      return
+    }
+
+    const currentX = e.touches[0].clientX
+    const diff = currentX - touchStartX
+
+    setDragOffset(diff)
+  }
+
+  /*
+   * 모바일 터치 종료
+   */
+  const handleTouchEnd = () => {
+    if (touchStartX === null) {
+      return
+    }
+
+    const threshold = 70
+
+    if (dragOffset <= -threshold) {
+      moveDate(1)
+    } else if (dragOffset >= threshold) {
+      moveDate(-1)
+    }
+
+    setTouchStartX(null)
+    setDragOffset(0)
+    setIsDragging(false)
+  }
+
+  /*
+   * PC 마우스 드래그 시작
+   */
+  const handleMouseDown = (e) => {
+    e.preventDefault()
+
+    mouseStartX.current = e.clientX
+
+    setDragOffset(0)
+    setIsDragging(true)
+  }
+
+  /*
+   * PC 마우스 이동
+   */
+  const handleMouseMove = (e) => {
+    if (mouseStartX.current === null) {
+      return
+    }
+
+    const diff = e.clientX - mouseStartX.current
+
+    setDragOffset(diff)
+  }
+
+  /*
+   * PC 마우스 드래그 종료
+   */
+  const handleMouseUp = () => {
+    if (mouseStartX.current === null) {
+      return
+    }
+
+    const threshold = 70
+
+    if (dragOffset <= -threshold) {
+      moveDate(1)
+    } else if (dragOffset >= threshold) {
+      moveDate(-1)
+    }
+
+    mouseStartX.current = null
+
+    setDragOffset(0)
+    setIsDragging(false)
+  }
+
+  /*
+   * 마우스가 카드 밖으로 나갔을 때
+   */
+  const handleMouseLeave = () => {
+    if (mouseStartX.current !== null) {
+      handleMouseUp()
+    }
+  }
+
+  /*
+   * 일정이 없는 경우
+   */
   if (dates.length === 0) {
     return (
       <div className="schedule-screen">
@@ -178,7 +253,10 @@ function ScheduleList({
             입력된 근무가 없습니다.
           </p>
 
-          <button onClick={onBack}>
+          <button
+            onClick={onBack}
+            type="button"
+          >
             듀티표 수정
           </button>
 
@@ -188,6 +266,7 @@ function ScheduleList({
   }
 
   const currentDate = dates[currentIndex]
+
   const currentDuty = dutyTable[currentDate]
 
   const previousDate =
@@ -196,7 +275,6 @@ function ScheduleList({
   const nextDate =
     dates[currentIndex + 1] || null
 
-  // 현재 날짜의 생활 일정 계산
   const currentSchedule = createSchedule({
     duty: currentDuty,
     dutyTimes,
@@ -204,6 +282,16 @@ function ScheduleList({
     sleepHours,
     sleepMinutes,
   })
+
+  /*
+   * 카드 이동 스타일
+   */
+  const cardStyle = {
+    transform: `translateX(${dragOffset}px)`,
+    transition: isDragging
+      ? 'none'
+      : 'transform 0.25s ease',
+  }
 
   return (
     <div className="schedule-screen">
@@ -216,15 +304,10 @@ function ScheduleList({
           듀티에 맞춰 자동으로 계산된 일정입니다.
         </p>
 
-        {/* 날짜 캐러셀 */}
-        <div
-          className="date-carousel"
-          onWheel={handleWheel}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        >
+        {/* 날짜 영역 */}
+        <div className="date-carousel">
 
-          {/* 이전 버튼 */}
+          {/* 이전 */}
           <button
             className="date-arrow date-arrow-left"
             onClick={() => moveDate(-1)}
@@ -234,7 +317,7 @@ function ScheduleList({
             ‹
           </button>
 
-          {/* 어제 / 이전 날짜 */}
+          {/* 이전 날짜 */}
           <div className="date-side date-previous">
 
             {previousDate && (
@@ -278,7 +361,7 @@ function ScheduleList({
 
           </div>
 
-          {/* 내일 / 다음 날짜 */}
+          {/* 다음 날짜 */}
           <div className="date-side date-next">
 
             {nextDate && (
@@ -301,7 +384,7 @@ function ScheduleList({
 
           </div>
 
-          {/* 다음 버튼 */}
+          {/* 다음 */}
           <button
             className="date-arrow date-arrow-right"
             onClick={() => moveDate(1)}
@@ -313,62 +396,93 @@ function ScheduleList({
 
         </div>
 
-        {/* 현재 날짜 일정 */}
+        {/* 생활 일정 카드 */}
         <div
-          className="schedule-card current-schedule"
-          key={currentDate}
+          className={`schedule-card-wrapper ${
+            slideDirection === 'next'
+              ? 'slide-next'
+              : slideDirection === 'previous'
+              ? 'slide-previous'
+              : ''
+          }`}
         >
 
-          <div className="schedule-date">
+          <div
+            className={`schedule-card current-schedule ${
+              isDragging ? 'dragging' : ''
+            }`}
+            style={cardStyle}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+          >
 
-            <strong>
-              {currentDate}
-            </strong>
+            {/* 카드 날짜 */}
+            <div className="schedule-date">
 
-            <span
-              className={`duty ${currentDuty}`}
-            >
-              {currentDuty}
-            </span>
+              <strong>
+                {currentDate}
+              </strong>
 
-          </div>
-
-          <div className="schedule-items">
-
-            {currentSchedule.map((item, index) => (
-
-              <div
-                className="schedule-item"
-                key={index}
+              <span
+                className={`duty ${currentDuty}`}
               >
+                {currentDuty}
+              </span>
 
-                <span className="schedule-icon">
-                  {item.type === 'sleep'
-                    ? '😴'
-                    : item.type === 'meal'
-                    ? '🍚'
-                    : item.type === 'prepare'
-                    ? '🚿'
-                    : '🏥'}
-                </span>
+            </div>
 
-                <span className="schedule-title">
-                  {item.title}
-                </span>
+            {/* 일정 */}
+            <div className="schedule-items">
 
-                <strong>
-                  {item.start} ~ {item.end}
-                </strong>
+              {currentSchedule.map((item, index) => (
 
-              </div>
+                <div
+                  className="schedule-item"
+                  key={index}
+                >
 
-            ))}
+                  <span className="schedule-icon">
+                    {item.type === 'sleep'
+                      ? '😴'
+                      : item.type === 'meal'
+                      ? '🍚'
+                      : item.type === 'prepare'
+                      ? '🚿'
+                      : '🏥'}
+                  </span>
+
+                  <span className="schedule-title">
+                    {item.title}
+                  </span>
+
+                  <strong>
+                    {item.start} ~ {item.end}
+                  </strong>
+
+                </div>
+
+              ))}
+
+            </div>
 
           </div>
 
         </div>
 
-        <button onClick={onBack} type="button">
+        {/* 스와이프 안내 */}
+        <p className="swipe-hint">
+          ← 카드를 좌우로 밀어서 날짜를 변경하세요 →
+        </p>
+
+        <button
+          onClick={onBack}
+          type="button"
+        >
           듀티표 수정
         </button>
 

@@ -1,29 +1,41 @@
 .schedule-screen {
   width: 100%;
   min-height: 100vh;
+
   padding: 40px 20px;
+
   display: flex;
   justify-content: center;
   align-items: flex-start;
+
   box-sizing: border-box;
 }
+
 
 .schedule-box {
   width: 100%;
   max-width: 700px;
+
   margin: 0 auto;
 }
 
+
 .schedule-box h1 {
   margin: 0;
+
   text-align: center;
+
   font-size: 30px;
 }
 
+
 .schedule-box .subtitle {
   margin: 10px 0 0;
+
   text-align: center;
+
   color: #777;
+
   font-size: 14px;
 }
 
@@ -47,19 +59,12 @@
   overflow: hidden;
 
   user-select: none;
-
-  /* 세로 스크롤은 허용하고
-     좌우 스와이프는 우리가 처리 */
-  touch-action: pan-y;
 }
 
 
-/* ========================================
-   가운데 날짜
-======================================== */
-
 .date-center {
   position: relative;
+
   z-index: 3;
 
   width: 155px;
@@ -76,7 +81,7 @@
 
   border-radius: 20px;
 
-  background: #ffffff;
+  background: #fff;
 
   box-shadow:
     0 8px 25px rgba(0, 0, 0, 0.10);
@@ -87,13 +92,16 @@
 
 .today-label {
   font-size: 14px;
+
   font-weight: 600;
+
   color: #777;
 }
 
 
 .center-date {
   font-size: 28px;
+
   line-height: 1;
 }
 
@@ -121,10 +129,6 @@
   opacity: 0.32;
 
   pointer-events: none;
-
-  transition:
-    opacity 0.25s ease,
-    transform 0.25s ease;
 }
 
 
@@ -140,18 +144,21 @@
 
 .side-date {
   font-size: 21px;
+
   font-weight: 600;
 }
 
 
 .side-day {
   font-size: 13px;
+
   color: #777;
 }
 
 
 .side-duty {
   margin-top: 2px;
+
   font-size: 13px;
 }
 
@@ -168,21 +175,23 @@
   width: 42px;
   height: 42px;
 
+  padding: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
 
-  padding: 0;
-
   border: none;
+
   border-radius: 50%;
 
-  background: #ffffff;
+  background: #fff;
 
   box-shadow:
     0 4px 15px rgba(0, 0, 0, 0.12);
 
   font-size: 30px;
+
   line-height: 1;
 
   cursor: pointer;
@@ -206,6 +215,7 @@
 
 .date-arrow:hover:not(:disabled) {
   background: #f5f5f5;
+
   transform: scale(1.05);
 }
 
@@ -217,59 +227,120 @@
 
 .date-arrow:disabled {
   opacity: 0.2;
+
   cursor: default;
 }
 
 
 /* ========================================
-   현재 일정 카드
+   생활 일정 카드
 ======================================== */
 
-.current-schedule {
-  animation: schedule-slide 0.25s ease;
-}
+.schedule-card-wrapper {
+  position: relative;
 
+  width: 100%;
 
-@keyframes schedule-slide {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
+  overflow: hidden;
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  border-radius: 20px;
 }
 
 
 .schedule-card {
+  position: relative;
+
   width: 100%;
+
   box-sizing: border-box;
 
   padding: 24px;
 
   border-radius: 20px;
 
-  background: #ffffff;
+  background: #fff;
 
   box-shadow:
     0 8px 25px rgba(0, 0, 0, 0.08);
+
+  cursor: grab;
+
+  user-select: none;
+
+  /* 모바일 스와이프 */
+  touch-action: pan-y;
+
+  will-change: transform;
 }
 
 
-/* 날짜 + 듀티 */
+.schedule-card.dragging {
+  cursor: grabbing;
+}
+
+
+/* 카드가 날짜 변경 후 살짝 나타나는 효과 */
+
+.schedule-card-wrapper.slide-next .schedule-card {
+  animation: card-slide-next 0.25s ease;
+}
+
+
+.schedule-card-wrapper.slide-previous .schedule-card {
+  animation: card-slide-previous 0.25s ease;
+}
+
+
+@keyframes card-slide-next {
+
+  from {
+    opacity: 0;
+
+    transform: translateX(35px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateX(0);
+  }
+
+}
+
+
+@keyframes card-slide-previous {
+
+  from {
+    opacity: 0;
+
+    transform: translateX(-35px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateX(0);
+  }
+
+}
+
+
+/* ========================================
+   카드 날짜
+======================================== */
 
 .schedule-date {
   display: flex;
+
   align-items: center;
+
   justify-content: space-between;
 
   margin-bottom: 20px;
 
   padding-bottom: 15px;
 
-  border-bottom: 1px solid #eeeeee;
+  border-bottom: 1px solid #eee;
 }
 
 
@@ -284,13 +355,16 @@
 
 .schedule-items {
   display: flex;
+
   flex-direction: column;
+
   gap: 10px;
 }
 
 
 .schedule-item {
   display: flex;
+
   align-items: center;
 
   min-height: 55px;
@@ -307,6 +381,7 @@
 
 .schedule-icon {
   width: 34px;
+
   flex-shrink: 0;
 
   font-size: 22px;
@@ -324,6 +399,7 @@
 
 .schedule-item strong {
   font-size: 14px;
+
   white-space: nowrap;
 }
 
@@ -334,6 +410,7 @@
 
 .duty {
   display: inline-flex;
+
   align-items: center;
   justify-content: center;
 
@@ -344,7 +421,25 @@
   border-radius: 8px;
 
   font-size: 13px;
+
   font-weight: 700;
+}
+
+
+/* ========================================
+   스와이프 안내
+======================================== */
+
+.swipe-hint {
+  margin: 14px 0 0;
+
+  text-align: center;
+
+  color: #aaa;
+
+  font-size: 12px;
+
+  user-select: none;
 }
 
 
@@ -373,9 +468,11 @@
   padding: 14px;
 
   border: none;
+
   border-radius: 12px;
 
   background: #222;
+
   color: #fff;
 
   font-size: 15px;
@@ -407,12 +504,14 @@
 
   .date-carousel {
     height: 135px;
+
     margin: 25px 0;
   }
 
 
   .date-center {
     width: 135px;
+
     min-width: 135px;
 
     padding: 17px 10px;
@@ -456,6 +555,7 @@
 
   .date-arrow {
     width: 36px;
+
     height: 36px;
 
     font-size: 25px;
@@ -472,20 +572,29 @@
   }
 
 
+  /* 모바일 카드 */
+
   .schedule-card {
     padding: 16px;
+
     border-radius: 16px;
+
+    /* 모바일에서는 카드 자체가
+       스와이프 영역 */
+    touch-action: pan-y;
   }
 
 
   .schedule-item {
     min-height: 52px;
+
     padding: 10px;
   }
 
 
   .schedule-icon {
     width: 30px;
+
     font-size: 20px;
   }
 
@@ -497,6 +606,11 @@
 
   .schedule-item strong {
     font-size: 12px;
+  }
+
+
+  .swipe-hint {
+    font-size: 11px;
   }
 
 }

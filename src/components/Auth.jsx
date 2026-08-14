@@ -1,6 +1,5 @@
-// src/components/Auth.jsx
-
 import { useState } from 'react'
+import '../styles/auth.css'
 
 function Auth({
   onLogin,
@@ -8,8 +7,8 @@ function Auth({
 }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-
   const [mode, setMode] = useState('login')
+  const [saveEmail, setSaveEmail] = useState(false)
 
   const handleLogin = async () => {
     await onLogin(email, password)
@@ -20,68 +19,155 @@ function Auth({
   }
 
   return (
-    <div className="app">
-      <div className="card auth-screen">
+    <div className="auth-screen">
 
-        <h1>듀티 메이트</h1>
+      <div className="auth-card">
 
-        <p className="subtitle">
+        {/* 로고 */}
+        <div className="auth-logo">
+
+          <div className="auth-logo-icon">
+            📅
+          </div>
+
+          <div className="auth-logo-text">
+            <h1>듀티 메이트</h1>
+            <p>나의 근무와 생활을 한눈에</p>
+          </div>
+
+        </div>
+
+
+        {/* 제목 */}
+        <h2 className="auth-title">
           {mode === 'login'
-            ? '로그인해주세요'
-            : '계정을 만들어주세요'}
+            ? '다시 만나서 반가워요'
+            : '새로운 시작을 함께해요'}
+        </h2>
+
+        <p className="auth-subtitle">
+          {mode === 'login'
+            ? '계정에 로그인해주세요.'
+            : '계정을 만들어주세요.'}
         </p>
 
-        <input
-          type="email"
-          placeholder="이메일"
-          value={email}
-          onChange={(e) =>
-            setEmail(e.target.value)
-          }
-        />
 
-        <input
-          type="password"
-          placeholder="비밀번호"
-          value={password}
-          onChange={(e) =>
-            setPassword(e.target.value)
-          }
-        />
+        {/* 이메일 */}
+        <div className="auth-field">
 
-        {mode === 'login' ? (
-          <>
-            <button onClick={handleLogin}>
-              로그인
-            </button>
+          <label htmlFor="auth-email">
+            이메일
+          </label>
 
-            <button
-              type="button"
-              onClick={() =>
-                setMode('signup')
-              }
-            >
-              회원가입
-            </button>
-          </>
-        ) : (
-          <>
-            <button onClick={handleSignUp}>
-              회원가입
-            </button>
+          <input
+            id="auth-email"
+            type="email"
+            placeholder="이메일을 입력해주세요"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-            <button
-              type="button"
-              onClick={() =>
-                setMode('login')
-              }
-            >
-              로그인으로 돌아가기
-            </button>
-          </>
+        </div>
+
+
+        {/* 비밀번호 */}
+        <div className="auth-field">
+
+          <label htmlFor="auth-password">
+            비밀번호
+          </label>
+
+          <input
+            id="auth-password"
+            type="password"
+            placeholder="비밀번호를 입력해주세요"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+        </div>
+
+
+        {/* 이메일 저장 */}
+        {mode === 'login' && (
+        <div className="auth-save">
+
+          <input
+            id="save-email"
+            type="checkbox"
+            checked={saveEmail}
+            onChange={(e) =>
+              setSaveEmail(e.target.checked)
+            }
+          />
+
+          <label htmlFor="save-email">
+            이메일 저장
+          </label>
+
+        </div>
         )}
 
+
+        {/* 메인 버튼 */}
+        <button
+          className="auth-main-button"
+          onClick={
+            mode === 'login'
+              ? handleLogin
+              : handleSignUp
+          }
+          type="button"
+        >
+          <span className="auth-main-text">
+            {mode === 'login'
+              ? '로그인'
+              : '회원가입'}
+          </span>
+
+          <span className="auth-arrow">
+            →
+          </span>
+        </button>
+
+
+        {/* 로그인 ↔ 회원가입 */}
+        <div className="auth-switch">
+
+          <span className="auth-switch-message">
+            {mode === 'login'
+              ? '아직 계정이 없으신가요?'
+              : '이미 계정이 있으신가요?'}
+          </span>
+
+          <button
+            className="auth-switch-button"
+            type="button"
+            onClick={() =>
+              setMode(
+                mode === 'login'
+                  ? 'signup'
+                  : 'login'
+              )
+            }
+          >
+            {mode === 'login'
+              ? '회원가입'
+              : '로그인'}
+          </button>
+
+        </div>
+
+
+        {/* 하단 */}
+        <div className="auth-footer">
+          <strong>DUTY MATE</strong>
+          <span>•</span>
+          생활을 더 편하게
+        </div>
+
       </div>
+
     </div>
   )
 }
