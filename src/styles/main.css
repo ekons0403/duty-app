@@ -120,3 +120,93 @@
     width:85%;
   }
 }
+
+/* 로그인 화면 */
+.auth-screen {
+  width: 100%;
+  max-width: 420px;
+  min-height: auto;
+  padding: 40px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.auth-screen h1 {
+  margin: 0 0 10px;
+  text-align: center;
+}
+
+.auth-screen .subtitle {
+  margin: 0 0 28px;
+  text-align: center;
+  color: #777;
+}
+
+.auth-screen input {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+}
+
+.auth-screen input:focus {
+  border-color: #999;
+}
+
+.auth-screen button {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  border: 0;
+  border-radius: 10px;
+  background: #222;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.auth-screen button:hover {
+  opacity: 0.9;
+}
+
+/* 사이드 메뉴 */
+.side-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 28px;
+}
+
+.side-menu button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 16px;
+  border: 0;
+  border-radius: 12px;
+  background: #f7f7f7;
+  color: #222;
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.side-menu button:hover {
+  background: #eaeaea;
+}
+
+.side-menu button:first-child {
+  margin-top: 4px;
+}
+
+.side-menu button span {
+  flex: 1;
+}

@@ -1,167 +1,502 @@
-.schedule-screen{
-  width:100%;
-  min-height:100vh;
-  padding:80px 30px 40px;
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
+.schedule-screen {
+  width: 100%;
+  min-height: 100vh;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  box-sizing: border-box;
 }
 
-.schedule-box{
-  width:min(900px,100%);
-  padding:40px;
-  border-radius:24px;
-  background:#fff;
+.schedule-box {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
 }
 
-.schedule-header{
-  text-align:center;
-  margin-bottom:35px;
+.schedule-box h1 {
+  margin: 0;
+  text-align: center;
+  font-size: 30px;
 }
 
-.schedule-header h1{
-  margin:0;
-  font-size:32px;
+.schedule-box .subtitle {
+  margin: 10px 0 0;
+  text-align: center;
+  color: #777;
+  font-size: 14px;
 }
 
-.subtitle{
-  margin:10px 0 0;
-  color:#777;
-  font-size:16px;
+
+/* ========================================
+   날짜 캐러셀
+======================================== */
+
+.date-carousel {
+  position: relative;
+
+  width: 100%;
+  height: 150px;
+
+  margin: 30px 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  user-select: none;
+
+  /* 세로 스크롤은 허용하고
+     좌우 스와이프는 우리가 처리 */
+  touch-action: pan-y;
 }
 
-.schedule-list{
-  display:flex;
-  flex-direction:column;
-  gap:18px;
+
+/* ========================================
+   가운데 날짜
+======================================== */
+
+.date-center {
+  position: relative;
+  z-index: 3;
+
+  width: 155px;
+  min-width: 155px;
+
+  padding: 20px 12px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  border-radius: 20px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.10);
+
+  transform: scale(1.05);
 }
 
-.empty-message{
-  padding:40px;
-  text-align:center;
-  color:#888;
-  border-radius:16px;
-  background:#f7f7f7;
+
+.today-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #777;
 }
 
-.schedule-card{
-  padding:22px;
-  border:1px solid #e5e5e5;
-  border-radius:18px;
-  background:#fff;
+
+.center-date {
+  font-size: 28px;
+  line-height: 1;
 }
 
-.schedule-date{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:18px;
+
+.current-duty {
+  margin-top: 3px;
 }
 
-.schedule-date strong{
-  font-size:18px;
+
+/* ========================================
+   양옆 날짜
+======================================== */
+
+.date-side {
+  position: absolute;
+
+  width: 110px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 5px;
+
+  opacity: 0.32;
+
+  pointer-events: none;
+
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
 }
 
-.duty{
-  min-width:45px;
-  padding:7px 10px;
-  border-radius:8px;
-  text-align:center;
-  font-size:13px;
-  font-weight:700;
+
+.date-previous {
+  left: calc(50% - 210px);
 }
 
-.duty.D{
-  background:#e8f3ff;
-  color:#2674b8;
+
+.date-next {
+  right: calc(50% - 210px);
 }
 
-.duty.E{
-  background:#fff2df;
-  color:#c47700;
+
+.side-date {
+  font-size: 21px;
+  font-weight: 600;
 }
 
-.duty.N{
-  background:#eee8ff;
-  color:#6845b8;
+
+.side-day {
+  font-size: 13px;
+  color: #777;
 }
 
-.duty.off{
-  background:#f1f1f1;
-  color:#777;
+
+.side-duty {
+  margin-top: 2px;
+  font-size: 13px;
 }
 
-.schedule-items{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+
+/* ========================================
+   좌우 버튼
+======================================== */
+
+.date-arrow {
+  position: absolute;
+
+  z-index: 10;
+
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.12);
+
+  font-size: 30px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
-.schedule-item{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  min-height:52px;
-  padding:12px 15px;
-  border-radius:12px;
-  background:#f7f7f7;
+
+.date-arrow-left {
+  left: 10px;
 }
 
-.schedule-icon{
-  width:30px;
-  text-align:center;
-  font-size:20px;
+
+.date-arrow-right {
+  right: 10px;
 }
 
-.schedule-title{
-  flex:1;
-  font-size:14px;
+
+.date-arrow:hover:not(:disabled) {
+  background: #f5f5f5;
+  transform: scale(1.05);
 }
 
-.schedule-item strong{
-  font-size:14px;
-  white-space:nowrap;
+
+.date-arrow:active:not(:disabled) {
+  transform: scale(0.95);
 }
 
-.schedule-back-button{
-  width:100%;
-  height:50px;
-  margin-top:25px;
-  border:0;
-  border-radius:10px;
-  background:#eee;
-  color:#333;
-  font-size:16px;
-  cursor:pointer;
+
+.date-arrow:disabled {
+  opacity: 0.2;
+  cursor: default;
 }
 
-.schedule-back-button:hover{
-  background:#ddd;
+
+/* ========================================
+   현재 일정 카드
+======================================== */
+
+.current-schedule {
+  animation: schedule-slide 0.25s ease;
 }
 
-@media(max-width:600px){
-  .schedule-screen{
-    padding:70px 15px 25px;
+
+@keyframes schedule-slide {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
 
-  .schedule-box{
-    padding:25px 15px;
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.schedule-card {
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 24px;
+
+  border-radius: 20px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+
+/* 날짜 + 듀티 */
+
+.schedule-date {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 20px;
+
+  padding-bottom: 15px;
+
+  border-bottom: 1px solid #eeeeee;
+}
+
+
+.schedule-date strong {
+  font-size: 18px;
+}
+
+
+/* ========================================
+   일정 항목
+======================================== */
+
+.schedule-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+
+.schedule-item {
+  display: flex;
+  align-items: center;
+
+  min-height: 55px;
+
+  padding: 12px 14px;
+
+  border-radius: 12px;
+
+  background: #f7f7f7;
+
+  box-sizing: border-box;
+}
+
+
+.schedule-icon {
+  width: 34px;
+  flex-shrink: 0;
+
+  font-size: 22px;
+}
+
+
+.schedule-title {
+  flex: 1;
+
+  margin-left: 8px;
+
+  font-size: 14px;
+}
+
+
+.schedule-item strong {
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+
+/* ========================================
+   듀티
+======================================== */
+
+.duty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 34px;
+
+  padding: 5px 9px;
+
+  border-radius: 8px;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+
+/* ========================================
+   빈 일정
+======================================== */
+
+.empty-message {
+  margin: 40px 0;
+
+  text-align: center;
+
+  color: #888;
+}
+
+
+/* ========================================
+   뒤로가기 버튼
+======================================== */
+
+.schedule-box > button {
+  width: 100%;
+
+  margin-top: 20px;
+
+  padding: 14px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #222;
+  color: #fff;
+
+  font-size: 15px;
+
+  cursor: pointer;
+}
+
+
+.schedule-box > button:hover {
+  opacity: 0.9;
+}
+
+
+/* ========================================
+   모바일
+======================================== */
+
+@media (max-width: 600px) {
+
+  .schedule-screen {
+    padding: 30px 14px;
   }
 
-  .schedule-header h1{
-    font-size:26px;
+
+  .schedule-box h1 {
+    font-size: 26px;
   }
 
-  .schedule-item{
-    gap:8px;
-    padding:10px;
+
+  .date-carousel {
+    height: 135px;
+    margin: 25px 0;
   }
 
-  .schedule-title{
-    font-size:13px;
+
+  .date-center {
+    width: 135px;
+    min-width: 135px;
+
+    padding: 17px 10px;
   }
 
-  .schedule-item strong{
-    font-size:12px;
+
+  .center-date {
+    font-size: 24px;
   }
+
+
+  .date-side {
+    width: 75px;
+  }
+
+
+  .date-previous {
+    left: calc(50% - 155px);
+  }
+
+
+  .date-next {
+    right: calc(50% - 155px);
+  }
+
+
+  .side-date {
+    font-size: 17px;
+  }
+
+
+  .side-day {
+    font-size: 11px;
+  }
+
+
+  .side-duty {
+    font-size: 11px;
+  }
+
+
+  .date-arrow {
+    width: 36px;
+    height: 36px;
+
+    font-size: 25px;
+  }
+
+
+  .date-arrow-left {
+    left: 3px;
+  }
+
+
+  .date-arrow-right {
+    right: 3px;
+  }
+
+
+  .schedule-card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+
+  .schedule-item {
+    min-height: 52px;
+    padding: 10px;
+  }
+
+
+  .schedule-icon {
+    width: 30px;
+    font-size: 20px;
+  }
+
+
+  .schedule-title {
+    font-size: 13px;
+  }
+
+
+  .schedule-item strong {
+    font-size: 12px;
+  }
+
 }

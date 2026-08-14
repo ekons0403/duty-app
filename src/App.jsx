@@ -134,6 +134,7 @@ function App(){
           open={accountOpen}
           onClose={()=>setAccountOpen(!accountOpen)}
           onLogout={handleLogout}
+          onNavigate={setStep}
         />
 
         {step===1&&(
